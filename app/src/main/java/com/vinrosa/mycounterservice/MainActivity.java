@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         //if logica
-        if (myCounterService.isRunning()) {
+        if (myCounterService != null && myCounterService.isRunning()) {
             Intent intent = new Intent(this, MyCounterService.class);
             intent.setAction(MyCounterService.STOP_COUNTER);
             startService(intent);
@@ -68,6 +68,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                          ((MyCounterService.MyCounterBinder) iBinder)
                                  .getService();
                 myCounterService.setCounterListener(MainActivity.this);
+                // Init Current Status as it may be running
+                if (myCounterService.isRunning()) {
+                    mTextView.setText("My counter is running ");
+                    mButton.setText("STOP");
+                } else {
+                    mTextView.setText("My counter is : " + myCounterService.getCounter());
+                    mButton.setText("START");
+                }
             }
             Log.d("MainActivity", "Service Connected!");
         }

@@ -10,6 +10,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.util.Log;
 
 public class MyCounterService extends Service implements Runnable {
 
@@ -34,6 +35,7 @@ public class MyCounterService extends Service implements Runnable {
         mHandler = new Handler(Looper.myLooper());
         mNotificationManager = NotificationManagerCompat.from(this);
         counter = 0;
+        Log.d("MyCounterService","On Create!");
     }
 
     @Override
@@ -51,9 +53,15 @@ public class MyCounterService extends Service implements Runnable {
         } else if (STOP_COUNTER.equals(intent.getAction())){
             mHandler.removeCallbacks(this);
             running = false;
-            publishNotification();
+
         }
         return START_STICKY;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d("MyCounterService", "Service destroyed!");
     }
 
     private void publishNotification() {
@@ -66,7 +74,9 @@ public class MyCounterService extends Service implements Runnable {
         PendingIntent contentIntent = PendingIntent
                 .getActivity(this, 0, targetIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         mBuilder.setContentIntent(contentIntent);
-        mNotificationManager.notify(0, mBuilder.build());
+
+        // ID Must be Greater than 0
+        startForeground(1, mBuilder.build());
     }
 
     // Overrides -- Runnable
@@ -79,6 +89,7 @@ public class MyCounterService extends Service implements Runnable {
                 @Override
                 public void run() {
                     listener.onCurrentValue(counter);
+                    publishNotification();
                 }
             });
         }
